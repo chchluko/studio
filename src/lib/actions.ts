@@ -4,14 +4,15 @@
 import { z } from 'zod';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { LoginSchema, VoteSchema } from '@/lib/schemas';
-import { addVote, hasVoted as dbHasVoted } from '@/lib/db';
-import { colleagues } from './data';
+import { LoginSchema, VoteSchema, BulkUploadSchema } from '@/lib/schemas';
+import { addVote, hasVoted as dbHasVoted, getColleagues, setColleagues } from '@/lib/db';
+import type { Colleague } from './data';
 
 const COOKIE_NAME = 'votacompa-user';
 
 export async function loginAction(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values);
+  const colleagues = getColleagues();
 
   if (!validatedFields.success) {
     return {
@@ -80,6 +81,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
 
 export async function checkUserAndVoteStatus() {
     const userEmployeeId = cookies().get(COOKIE_NAME)?.value;
+    const colleagues = getColleagues();
     if (!userEmployeeId) {
         redirect('/');
     }
@@ -97,4 +99,41 @@ export async function checkUserAndVoteStatus() {
       userName: user.name,
       hasVoted: userHasVoted,
     };
+}
+
+export async function bulkUploadAction(values: z.infer<typeof BulkUploadSchema>) {
+  const validatedFields = BulkUploadSchema.safeParse(values);
+
+  if (!validatedFields.success) {
+    return {
+      error: 'El formato de los datos es inválido.',
+      success: null,
+    };
+  }
+  
+  const { csvData } = validatedFields.data;
+  
+  try {
+    const lines = csvData.trim().split('\n');
+    const newColleagues: Colleague[] = lines.map(line => {
+      const [id, name, role] = line.split(',').map(item => item.trim());
+      if (!id || !name || !role) {
+        throw new Error('Cada línea debe contener ID, Nombre y Rol separados por comas.');
+      }
+      return { id, name, role, photoUrl: null, photoHint: null };
+    });
+
+    setColleagues(newColleagues);
+
+    return {
+      error: null,
+      success: `Se han cargado ${newColleagues.length} empleados correctamente.`,
+    };
+
+  } catch (error: any) {
+    return {
+      error: error.message || 'Error al procesar los datos.',
+      success: null,
+    }
+  }
 }

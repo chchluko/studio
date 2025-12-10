@@ -1,5 +1,4 @@
-import { getVotes } from '@/lib/db';
-import { colleagues } from '@/lib/data';
+import { getVotes, getColleagues } from '@/lib/db';
 import {
   Table,
   TableBody,
@@ -21,6 +20,7 @@ export const dynamic = 'force-dynamic';
 
 export default function ResultsPage() {
   const votes = getVotes();
+  const colleagues = getColleagues();
   
   const votesWithNames = votes.map(vote => {
     const voter = colleagues.find(c => c.id === vote.voterId);

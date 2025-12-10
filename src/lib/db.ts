@@ -1,4 +1,7 @@
 // This is a mock in-memory database. Data will be lost on server restart.
+import type { Colleague } from './data';
+import { colleagues as initialColleagues } from './data';
+
 
 interface Vote {
   voterId: string;
@@ -8,6 +11,25 @@ interface Vote {
 }
 
 const votes: Vote[] = [];
+let colleagues: Colleague[] = [...initialColleagues];
+
+
+/**
+ * Gets the current list of colleagues.
+ * @returns An array of colleagues.
+ */
+export function getColleagues(): Colleague[] {
+    return colleagues;
+}
+
+/**
+ * Replaces the current list of colleagues with a new one.
+ * @param newColleagues The new array of colleagues.
+ */
+export function setColleagues(newColleagues: Colleague[]): void {
+    colleagues = newColleagues;
+    console.log('Colleagues list updated. Total:', colleagues.length);
+}
 
 /**
  * Checks if a user has already voted based on their employee ID.

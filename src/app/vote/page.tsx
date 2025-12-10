@@ -1,11 +1,11 @@
-import { colleagues } from '@/lib/data';
+import { getColleagues } from '@/lib/db';
 import { checkUserAndVoteStatus } from '@/lib/actions';
 import { VoteForm } from '@/components/vote-form';
 import { VotaCompaLogo } from '@/components/votacompa-logo';
 
 export default async function VotePage() {
   const { userName, hasVoted } = await checkUserAndVoteStatus();
-  const allColleagues = colleagues;
+  const allColleagues = getColleagues();
 
   return (
     <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
