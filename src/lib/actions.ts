@@ -68,6 +68,9 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
       candidateId,
       reason,
     });
+    
+    // Cerrar sesión después de votar
+    cookies().delete(COOKIE_NAME);
   } catch (error) {
     return {
       error: 'Ocurrió un error al registrar tu voto. Inténtalo de nuevo.',

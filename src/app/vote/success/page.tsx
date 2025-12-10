@@ -21,8 +21,11 @@ export default function VoteSuccessPage() {
           <p className="text-muted-foreground">
             Tu voto ha sido registrado correctamente. Has contribuido a reconocer el esfuerzo de tus compañeros.
           </p>
+          <p className="text-sm text-muted-foreground">
+            Tu sesión ha sido cerrada. Otra persona puede votar ahora.
+          </p>
           <Button asChild className="w-full">
-            <Link href="/">Volver al inicio</Link>
+            <Link href="/">Ir al inicio</Link>
           </Button>
         </CardContent>
       </Card>
