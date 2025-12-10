@@ -1,0 +1,138 @@
+/**
+ * Core Philosophy: This ruleset governs a simple voting application. It enforces a hybrid security model:
+ * 1. Public data: Information about candidates is publicly readable by anyone.
+ * 2. Private data: A user's voter status is strictly private and accessible only by that user.
+ * 3. Transactional data: Votes are write-once records. A user can create their own vote but cannot read others' votes to protect privacy (e.g., the 'reason' field).
+ *
+ * Data Structure:
+ * - /candidates/{candidateId}: A public, top-level collection for candidate information. Client-side writes are disabled, assuming this is admin-managed data.
+ * - /users/{userId}/voters/{voterId}: A user-owned subcollection holding a document that tracks if the user has voted. This enforces strict data privacy.
+ * - /votes/{voteId}: A central collection where all votes are recorded. Rules prevent double-voting and ensure a user can only submit a vote for themselves.
+ *
+ * Key Security Decisions:
+ * - Vote Immutability: Once a vote is cast into the `/votes` collection, it cannot be updated or deleted by clients.
+ * - Vote Privacy: To protect potentially sensitive information like the `reason` for a vote, users can only read their own vote documents. Listing the entire `/votes` collection is disabled to prevent data scraping.
+ * - Preventing Double-Voting: The rule for creating a vote document performs a `get()` request to the user's private `/users/{userId}/voters` document to ensure their `hasVoted` flag is `false` before allowing the write.
+ * - Admin Data: The `/candidates` collection is treated as read-only for clients. It is assumed that candidate data is populated using the Admin SDK or through the Firebase Console.
+ *
+ * Denormalization for Authorization:
+ * The `/votes/{voteId}` document contains a denormalized `voterId` field. This allows rules to quickly verify the vote's owner without needing to join or look up other documents for read operations. The `/users/{userId}/voters/{voterId}` document itself serves as an authorization-specific record, holding the `hasVoted` state to enable a quick and secure check during vote creation.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for improved readability and reusability.
+    
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user's UID matches the provided userId.
+     * This is the primary function for enforcing user-owned data.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Validates that a document exists before an update or delete operation.
+     * Prevents operations on non-existent documents, which is a security best practice.
+     */
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    /**
+     * Checks if the user is allowed to cast a new vote.
+     * This requires a read of the user's voter status document.
+     */
+    function canCreateVote() {
+      let voterDocPath = /databases/$(database)/documents/users/$(request.auth.uid)/voters/$(request.auth.uid);
+      let voterDoc = get(voterDocPath).data;
+      
+      // Allow creation if the user is signed in, the voterId in the new document matches their own UID,
+      // and their corresponding voter document shows they have not yet voted.
+      return isSignedIn()
+        && request.resource.data.voterId == request.auth.uid
+        && exists(voterDocPath)
+        && voterDoc.hasVoted == false;
+    }
+
+    /**
+     * Checks if the requester is the owner of an existing vote document.
+     */
+    function isVoteOwner() {
+      return isExistingDoc() && resource.data.voterId == request.auth.uid;
+    }
+
+    /**
+     * @description Publicly readable information about all candidates.
+     * @path /candidates/{candidateId}
+     * @allow (get) Any user, signed in or not, can read a candidate's profile.
+     * @deny (create) A signed-in user cannot create a new candidate document.
+     * @principle Public read access for global data, with writes disabled for clients (admin-managed).
+     */
+    match /candidates/{candidateId} {
+      allow get: if true;
+      allow list: if true;
+
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /users/{userId} {
+      /**
+       * @description A user's private voter status document.
+       * @path /users/{userId}/voters/{voterId}
+       * @allow (create) A user can create their own voter status document (`/users/abc/voters/abc`).
+       * @deny (get) A user cannot read another user's voter status (`/users/xyz/voters/xyz`).
+       * @principle Restricts access to a user's own data tree (Ownership).
+       */
+      match /voters/{voterId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+
+        // A user can create their own voter document. The voterId in the path must match the userId.
+        // Also enforces that the internal userId field is set correctly.
+        allow create: if isOwner(userId) && userId == voterId && request.resource.data.userId == userId;
+        
+        // The owner can update their voter document (e.g., setting hasVoted=true in a transaction).
+        // The userId field must remain immutable.
+        allow update: if isOwner(userId) && isExistingDoc() && request.resource.data.userId == resource.data.userId;
+        
+        // The owner can delete their voter document.
+        allow delete: if isOwner(userId) && isExistingDoc();
+      }
+    }
+    
+    /**
+     * @description A collection of all votes cast. These are write-once and immutable.
+     * @path /votes/{voteId}
+     * @allow (create) A signed-in user can create a vote if their `voterId` matches their UID and they haven't voted yet.
+     * @deny (create) A user who has already voted tries to create a second vote.
+     * @deny (get) A user tries to read a vote cast by another user.
+     * @deny (list) A user tries to list all votes in the collection.
+     * @principle Enforces transactional integrity (no double-voting) and data privacy (votes are private).
+     */
+    match /votes/{voteId} {
+      // A user can read their own vote, but cannot see others' votes.
+      allow get: if isSignedIn() && isVoteOwner();
+      
+      // Listing all votes is disallowed to protect privacy and prevent data scraping.
+      allow list: if false;
+
+      // Creating a vote has strict validation to prevent fraud.
+      allow create: if canCreateVote();
+      
+      // Votes are immutable; they cannot be changed or deleted after being cast.
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

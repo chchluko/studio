@@ -1,0 +1,154 @@
+{
+  "entities": {
+    "Voter": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Voter",
+      "type": "object",
+      "description": "Represents a voter in the system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the voter."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the user who is voting. Links to an external authentication system. (Relationship: User 1:1 Voter)"
+        },
+        "hasVoted": {
+          "type": "boolean",
+          "description": "Indicates whether the voter has already cast their vote."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "hasVoted"
+      ]
+    },
+    "Candidate": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Candidate",
+      "type": "object",
+      "description": "Represents a candidate who can be voted for.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the candidate."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the candidate."
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "URL of the candidate's photo stored in Firebase Storage.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "photoUrl"
+      ]
+    },
+    "Vote": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vote",
+      "type": "object",
+      "description": "Represents a single vote cast by a voter for a candidate.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the vote."
+        },
+        "voterId": {
+          "type": "string",
+          "description": "Reference to the voter who cast the vote. (Relationship: Voter 1:N Vote)"
+        },
+        "candidateId": {
+          "type": "string",
+          "description": "Reference to the candidate who received the vote. (Relationship: Candidate 1:N Vote)"
+        },
+        "reason": {
+          "type": "string",
+          "description": "The voter's reason for selecting the candidate."
+        },
+        "voteDate": {
+          "type": "string",
+          "description": "Date and time when the vote was cast.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "voterId",
+        "candidateId",
+        "reason",
+        "voteDate"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/candidates/{candidateId}",
+        "definition": {
+          "entityName": "Candidate",
+          "schema": {
+            "$ref": "#/backend/entities/Candidate"
+          },
+          "description": "Stores information about candidates.  No denormalized authorization fields required, assumed to be public.",
+          "params": [
+            {
+              "name": "candidateId",
+              "description": "Unique identifier for the candidate."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/voters/{voterId}",
+        "definition": {
+          "entityName": "Voter",
+          "schema": {
+            "$ref": "#/backend/entities/Voter"
+          },
+          "description": "Stores voter information for each user. Enforces path-based ownership: each user can only access their own voter document.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "voterId",
+              "description": "Unique identifier for the voter (same as userId)."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/votes/{voteId}",
+        "definition": {
+          "entityName": "Vote",
+          "schema": {
+            "$ref": "#/backend/entities/Vote"
+          },
+          "description": "Stores vote information. No denormalized authorization fields required.",
+          "params": [
+            {
+              "name": "voteId",
+              "description": "Unique identifier for the vote."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support a simple voting application where users can vote for candidates. The structure emphasizes security and scalability, adhering to the principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are Not Filters).\n\n*   **Candidates Collection:** This collection stores candidate information, including the URL of their photo in Firebase Storage. It has a flat structure. Listing candidates is inherently public, assuming that the app intends to display all candidates to every user.\n*   **Users Collection:** This collection uses path-based ownership for voters, ensuring each user can only access their own voter document. This is a standard approach for private user data.\n*   **Voters Subcollection:** Under each user, there is a 'voters' subcollection. This subcollection contains at most one document, indicating whether the user has voted or not.\n*   **Votes Collection:** This collection stores all the votes cast. Each vote document includes the voterId and candidateId. The votes collection does not contain private data and is not user specific.\n\n**Authorization Independence:**\n\n*   The `voters` subcollection under each user enforces that only the authenticated user can read or write their own voter document. This eliminates the need for `get()` calls in the security rules.\n\n**QAPs Support:**\n\n*   The segregation of candidate data into a top-level `/candidates` collection enables straightforward `list` operations, as there are no complex authorization rules. All users can view all candidates.\n*   The `voters` subcollection under each user allows for secure listing of each user's voting status, ensuring that users can only access their own data."
+  }
+}
