@@ -3,7 +3,7 @@ import { VotaCompaLogo } from '@/components/votacompa-logo';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { BarChart, Upload } from 'lucide-react';
+import { BarChart, Upload, Users } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -25,7 +25,7 @@ export default function Home() {
             <LoginForm />
           </CardContent>
         </Card>
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-wrap justify-center gap-4">
             <Button variant="link" asChild>
                 <Link href="/admin/results">
                     <BarChart className="mr-2 h-4 w-4" />
@@ -36,6 +36,12 @@ export default function Home() {
                 <Link href="/admin/upload">
                     <Upload className="mr-2 h-4 w-4" />
                     Carga Masiva
+                </Link>
+            </Button>
+            <Button variant="link" asChild>
+                <Link href="/admin/employees">
+                    <Users className="mr-2 h-4 w-4" />
+                    Ver Empleados
                 </Link>
             </Button>
         </div>
