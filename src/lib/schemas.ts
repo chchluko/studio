@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const LoginSchema = z.object({
-  email: z.string().email({ message: 'Por favor, introduce un correo electrónico válido.' }),
+  employeeId: z.string().min(1, { message: 'Por favor, introduce tu número de nómina.' }),
 });
 
 export const VoteSchema = z.object({

@@ -15,7 +15,7 @@ export default function Home() {
               Inicia sesión para votar
             </h2>
             <p className="text-center text-sm text-muted-foreground">
-              Usa tu correo electrónico para acceder al sistema de votación.
+              Usa tu número de nómina para acceder al sistema de votación.
             </p>
           </CardHeader>
           <CardContent>

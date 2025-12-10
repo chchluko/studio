@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { LoginSchema, VoteSchema } from '@/lib/schemas';
 import { addVote, hasVoted } from '@/lib/db';
+import { colleagues } from './data';
 
 const COOKIE_NAME = 'votacompa-user';
 
@@ -14,15 +15,21 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
 
   if (!validatedFields.success) {
     return {
-      error: 'Correo electrónico inválido.',
+      error: 'Número de nómina inválido.',
     };
   }
   
-  const { email } = validatedFields.data;
+  const { employeeId } = validatedFields.data;
 
-  // In a real app, you would verify the user exists in your database
+  const userExists = colleagues.some(c => c.id === employeeId);
+
+  if (!userExists) {
+    return {
+      error: 'El número de nómina no se encuentra en la lista de empleados autorizados.'
+    }
+  }
   
-  cookies().set(COOKIE_NAME, email, {
+  cookies().set(COOKIE_NAME, employeeId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     maxAge: 60 * 60 * 24, // 1 day
@@ -34,13 +41,13 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
 
 export async function voteAction(values: z.infer<typeof VoteSchema>) {
   const validatedFields = VoteSchema.safeParse(values);
-  const userEmail = cookies().get(COOKIE_NAME)?.value;
+  const userEmployeeId = cookies().get(COOKIE_NAME)?.value;
 
-  if (!userEmail) {
+  if (!userEmployeeId) {
     return redirect('/');
   }
 
-  if (hasVoted(userEmail)) {
+  if (hasVoted(userEmployeeId)) {
      return redirect('/vote/already-voted');
   }
 
@@ -56,7 +63,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
 
   try {
     addVote({
-      voterEmail: userEmail,
+      voterId: userEmployeeId,
       candidateId,
       reason,
     });
@@ -71,12 +78,19 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
 
 
 export async function checkUserAndVoteStatus() {
-    const userEmail = cookies().get(COOKIE_NAME)?.value;
-    if (!userEmail) {
+    const userEmployeeId = cookies().get(COOKIE_NAME)?.value;
+    if (!userEmployeeId) {
         redirect('/');
     }
-    if (hasVoted(userEmail)) {
+
+    const user = colleagues.find(c => c.id === userEmployeeId);
+    if (!user) {
+        // This case should ideally not happen if login is correct
+        redirect('/');
+    }
+
+    if (hasVoted(userEmployeeId)) {
         redirect('/vote/already-voted');
     }
-    return userEmail;
+    return user.name;
 }

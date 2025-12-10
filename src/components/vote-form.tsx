@@ -5,7 +5,6 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
-import Image from 'next/image';
 import { voteAction } from '@/lib/actions';
 import { VoteSchema } from '@/lib/schemas';
 import {
@@ -21,17 +20,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, User, Check, Search } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface VoteFormProps {
   colleagues: Colleague[];
-  userEmail: string;
 }
 
-export function VoteForm({ colleagues, userEmail }: VoteFormProps) {
+export function VoteForm({ colleagues }: VoteFormProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -104,16 +102,17 @@ export function VoteForm({ colleagues, userEmail }: VoteFormProps) {
                          <RadioGroupItem value={colleague.id} id={field.name + colleague.id} className="sr-only" />
                         <CardContent className="relative flex items-center space-x-4 p-4">
                            <Avatar className="h-20 w-20">
-                            {colleague.photoUrl && (
+                            {colleague.photoUrl ? (
                               <AvatarImage 
                                 src={colleague.photoUrl} 
                                 alt={`Foto de ${colleague.name}`}
                                 data-ai-hint={colleague.photoHint || ''}
                               />
+                            ) : (
+                               <AvatarFallback className="text-3xl">
+                                <User />
+                               </AvatarFallback>
                             )}
-                            <AvatarFallback className="text-3xl">
-                              <User />
-                            </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 space-y-1">
                             <p className="font-semibold">{colleague.name}</p>

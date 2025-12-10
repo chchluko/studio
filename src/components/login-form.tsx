@@ -26,7 +26,7 @@ export function LoginForm() {
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      email: '',
+      employeeId: '',
     },
   });
 
@@ -48,14 +48,14 @@ export function LoginForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="email"
+          name="employeeId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Correo Electrónico</FormLabel>
+              <FormLabel>Número de Nómina</FormLabel>
               <FormControl>
                 <Input
-                  type="email"
-                  placeholder="tu.correo@ejemplo.com"
+                  type="text"
+                  placeholder="Tu número de nómina"
                   {...field}
                   disabled={isPending}
                 />

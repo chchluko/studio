@@ -4,7 +4,7 @@ import { VoteForm } from '@/components/vote-form';
 import { VotaCompaLogo } from '@/components/votacompa-logo';
 
 export default async function VotePage() {
-  const userEmail = await checkUserAndVoteStatus();
+  const userName = await checkUserAndVoteStatus();
   const allColleagues = colleagues;
 
   return (
@@ -15,11 +15,11 @@ export default async function VotePage() {
              <VotaCompaLogo />
             </div>
           <p className="text-lg text-muted-foreground">
-            Hola <span className="font-semibold text-primary">{userEmail}</span>. Es hora de reconocer a un gran compañero.
+            Hola <span className="font-semibold text-primary">{userName}</span>. Es hora de reconocer a un gran compañero.
           </p>
         </header>
 
-        <VoteForm colleagues={allColleagues} userEmail={userEmail} />
+        <VoteForm colleagues={allColleagues} />
       </div>
     </main>
   );
