@@ -2,9 +2,10 @@ import { getColleagues } from '@/lib/db';
 import { checkUserAndVoteStatus } from '@/lib/actions';
 import { VoteForm } from '@/components/vote-form';
 import { VotaCompaLogo } from '@/components/votacompa-logo';
+import { UploadPhoto } from './upload-photo';
 
 export default async function VotePage() {
-  const { userName, hasVoted } = await checkUserAndVoteStatus();
+  const { userName, hasVoted, user } = await checkUserAndVoteStatus();
   const allColleagues = getColleagues();
 
   return (
@@ -14,9 +15,12 @@ export default async function VotePage() {
             <div className="flex justify-center">
              <VotaCompaLogo />
             </div>
-          <p className="text-lg text-muted-foreground">
-            Hola <span className="font-semibold text-primary">{userName}</span>. Es hora de reconocer a un gran compañero.
-          </p>
+          <div className="flex justify-center items-center gap-4">
+            <p className="text-lg text-muted-foreground">
+                Hola <span className="font-semibold text-primary">{userName}</span>. Es hora de reconocer a un gran compañero.
+            </p>
+            {user && <UploadPhoto user={user} />}
+          </div>
         </header>
 
         <VoteForm colleagues={allColleagues} hasVoted={hasVoted} />

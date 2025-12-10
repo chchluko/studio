@@ -21,6 +21,7 @@ const colleaguesData = [
   { id: '10', name: 'Mateo Castillo', role: 'Diseñador Gráfico' },
   { id: '11', name: 'Isabella Vargas', role: 'Analista de Calidad (QA)' },
   { id: '12', name: 'Sebastián Morales', role: 'Scrum Master' },
+  { id: '13', name: 'Usuario sin Foto', role: 'Tester' },
 ];
 
 export const colleagues: Colleague[] = colleaguesData.map((colleague) => {

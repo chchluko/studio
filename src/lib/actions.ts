@@ -96,6 +96,7 @@ export async function checkUserAndVoteStatus() {
     const userHasVoted = dbHasVoted(userEmployeeId);
     
     return {
+      user: user,
       userName: user.name,
       hasVoted: userHasVoted,
     };
