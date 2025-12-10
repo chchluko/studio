@@ -1,5 +1,5 @@
 
-import { initializeApp, getApps, getApp, FirebaseApp, deleteApp } from 'firebase-admin/app';
+import { initializeApp, getApps, getApp, FirebaseApp, credential } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { getStorage, Storage } from 'firebase-admin/storage';
 import { firebaseConfig } from './config';
@@ -25,15 +25,13 @@ export async function initializeFirebaseAdmin(): Promise<FirebaseAdminServices> 
     if (getApps().length > 0) {
       // This can happen in development with hot-reloading
       adminApp = getApp();
-    } else {
+    } else if (serviceAccount) {
       adminApp = initializeApp({
-        credential: {
-          projectId: firebaseConfig.projectId,
-          clientEmail: serviceAccount?.client_email,
-          privateKey: serviceAccount?.private_key.replace(/\\n/g, '\n'),
-        },
+        credential: credential.cert(serviceAccount),
         storageBucket: `${firebaseConfig.projectId}.appspot.com`,
       });
+    } else {
+        throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable is not set. Cannot initialize Firebase Admin SDK.');
     }
     firestore = getFirestore(adminApp);
     storage = getStorage(adminApp);
