@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  devIndicators: {
+    buildActivity: false, // Esto oculta el indicador de actividad de compilación
+  },
   images: {
     remotePatterns: [
       {
