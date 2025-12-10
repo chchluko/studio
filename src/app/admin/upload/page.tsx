@@ -4,13 +4,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { BulkUploadForm } from './bulk-upload-form';
-import { redirect } from 'next/navigation';
-import { isCurrentUserAdmin } from '@/lib/constants';
 
 export default function BulkUploadPage() {
-    if (!isCurrentUserAdmin()) {
-        redirect('/');
-    }
     return (
         <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
             <div className="absolute left-4 top-4">

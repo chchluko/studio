@@ -13,15 +13,10 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { redirect } from 'next/navigation';
-import { isCurrentUserAdmin } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
 export default async function EmployeesPage() {
-  if (!isCurrentUserAdmin()) {
-    redirect('/');
-  }
   const colleagues = await getColleagues();
 
   return (
