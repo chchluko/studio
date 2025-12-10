@@ -43,24 +43,33 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
   const validatedFields = VoteSchema.safeParse(values);
   const userEmployeeId = cookies().get(COOKIE_NAME)?.value;
 
+  console.log('VoteAction called for user:', userEmployeeId);
+
   if (!userEmployeeId) {
+    console.log('No user ID found, redirecting to home');
     return redirect('/');
   }
 
-  if (await dbHasVoted(userEmployeeId)) {
+  const hasVoted = await dbHasVoted(userEmployeeId);
+  console.log(`User ${userEmployeeId} has voted: ${hasVoted}`);
+  
+  if (hasVoted) {
      // This case should be rare as the UI is disabled, but it's a good safeguard.
+     console.log('User already voted, returning error');
      return {
       error: 'Ya has emitido tu voto.',
     };
   }
 
   if (!validatedFields.success) {
+    console.log('Validation failed:', validatedFields.error);
     return {
       error: 'Datos de votación inválidos. Asegúrate de seleccionar un compañero y escribir un motivo.',
     };
   }
 
   const { candidateId, reason } = validatedFields.data;
+  console.log('Calling addVote with:', { voterId: userEmployeeId, candidateId });
 
   try {
     await addVote({
@@ -69,14 +78,17 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
       reason,
     });
     
+    console.log('Vote added successfully, deleting cookie');
     // Cerrar sesión después de votar
     cookies().delete(COOKIE_NAME);
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error in voteAction:', error);
     return {
       error: 'Ocurrió un error al registrar tu voto. Inténtalo de nuevo.',
     };
   }
 
+  console.log('Redirecting to success page');
   return redirect('/vote/success');
 }
 
