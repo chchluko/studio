@@ -2,14 +2,12 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  devIndicators: false,
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
-  },
-  devIndicators: {
-    buildActivity: false, // Esto oculta el indicador de actividad de compilación
   },
   images: {
     remotePatterns: [
