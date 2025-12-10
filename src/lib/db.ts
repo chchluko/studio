@@ -17,17 +17,28 @@ import {
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { initializeFirebaseAdmin } from '@/firebase/server';
 import type { Colleague } from './data';
+import { colleagues as localColleagues } from './data';
 import type { Vote } from './schemas';
 
 
 async function getDb() {
-  const { firestore } = await initializeFirebaseAdmin();
-  return firestore;
+    try {
+        const { firestore } = await initializeFirebaseAdmin();
+        return firestore;
+    } catch (error) {
+        console.warn("Could not initialize Firebase Admin SDK. Using mock data. Error:", (error as Error).message);
+        return null;
+    }
 }
 
 async function getStore() {
-    const { storage } = await initializeFirebaseAdmin();
-    return storage;
+    try {
+        const { storage } = await initializeFirebaseAdmin();
+        return storage;
+    } catch (error) {
+        console.warn("Could not initialize Firebase Admin SDK for Storage. Using mock data. Error:", (error as Error).message);
+        return null;
+    }
 }
 
 
@@ -37,8 +48,14 @@ async function getStore() {
  */
 export async function getColleagues(): Promise<Colleague[]> {
   const db = await getDb();
+  if (!db) {
+    return Promise.resolve(localColleagues);
+  }
   const colleaguesCol = collection(db, 'candidates');
   const snapshot = await getDocs(colleaguesCol);
+  if (snapshot.empty) {
+    return localColleagues;
+  }
   return snapshot.docs.map((doc) => ({ ...(doc.data() as Colleague), id: doc.id }));
 }
 
@@ -49,6 +66,10 @@ export async function getColleagues(): Promise<Colleague[]> {
  */
 export async function setColleagues(newColleagues: Colleague[]): Promise<void> {
   const db = await getDb();
+   if (!db) {
+    console.log('DB not available, skipping setColleagues');
+    return;
+  }
   const batch = writeBatch(db);
   const colleaguesColRef = collection(db, 'candidates');
 
@@ -73,6 +94,9 @@ export async function setColleagues(newColleagues: Colleague[]): Promise<void> {
  */
 export async function hasVoted(userId: string): Promise<boolean> {
   const db = await getDb();
+  if (!db) {
+    return false;
+  }
   const votesCol = collection(db, 'votes');
   const q = query(votesCol, where('voterId', '==', userId));
   const snapshot = await getDocs(q);
@@ -86,6 +110,10 @@ export async function hasVoted(userId: string): Promise<boolean> {
  */
 export async function addVote(vote: Omit<Vote, 'timestamp' | 'id'>): Promise<void> {
     const db = await getDb();
+    if (!db) {
+        console.log('DB not available, skipping addVote');
+        return;
+    }
     if (await hasVoted(vote.voterId)) {
         throw new Error('El usuario ya ha votado.');
     }
@@ -99,6 +127,9 @@ export async function addVote(vote: Omit<Vote, 'timestamp' | 'id'>): Promise<voi
  */
 export async function getVotes(): Promise<(Vote & {id: string})[]> {
     const db = await getDb();
+    if (!db) {
+        return [];
+    }
     const votesCol = collection(db, 'votes');
     const snapshot = await getDocs(votesCol);
     return snapshot.docs.map(doc => {
@@ -121,6 +152,10 @@ export async function getVotes(): Promise<(Vote & {id: string})[]> {
 export async function uploadPhotoAndUpdateProfile(userId: string, file: File): Promise<string> {
     const storage = await getStore();
     const db = await getDb();
+
+    if (!storage || !db) {
+        throw new Error("El servicio de almacenamiento o base de datos no está disponible.");
+    }
 
     // Create a storage reference
     const storageRef = ref(storage, `profile-photos/${userId}/${file.name}`);

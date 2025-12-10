@@ -50,9 +50,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
   }
 
   if (await dbHasVoted(userEmployeeId)) {
-     return {
-      error: 'Ya has emitido tu voto.',
-    };
+     return redirect('/vote/already-voted');
   }
 
   if (!validatedFields.success) {
@@ -95,6 +93,10 @@ export async function checkUserAndVoteStatus() {
     }
 
     const userHasVoted = await dbHasVoted(userEmployeeId);
+
+    if (userHasVoted) {
+      // Don't redirect here, let the page handle the state
+    }
     
     return {
       user: user,
