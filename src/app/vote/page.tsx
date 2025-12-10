@@ -4,7 +4,7 @@ import { VoteForm } from '@/components/vote-form';
 import { VotaCompaLogo } from '@/components/votacompa-logo';
 
 export default async function VotePage() {
-  const userName = await checkUserAndVoteStatus();
+  const { userName, hasVoted } = await checkUserAndVoteStatus();
   const allColleagues = colleagues;
 
   return (
@@ -19,7 +19,7 @@ export default async function VotePage() {
           </p>
         </header>
 
-        <VoteForm colleagues={allColleagues} />
+        <VoteForm colleagues={allColleagues} hasVoted={hasVoted} />
       </div>
     </main>
   );

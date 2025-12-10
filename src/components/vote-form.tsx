@@ -17,19 +17,32 @@ import {
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Check, Search } from 'lucide-react';
+import { Loader2, User, Check, Search, Vote } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 interface VoteFormProps {
   colleagues: Colleague[];
+  hasVoted: boolean;
 }
 
-export function VoteForm({ colleagues }: VoteFormProps) {
+export function VoteForm({ colleagues, hasVoted }: VoteFormProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -58,6 +71,8 @@ export function VoteForm({ colleagues }: VoteFormProps) {
   const filteredColleagues = colleagues.filter((colleague) =>
     colleague.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  const selectedCandidate = colleagues.find(c => c.id === form.watch('candidateId'));
 
   return (
     <Form {...form}>
@@ -72,7 +87,7 @@ export function VoteForm({ colleagues }: VoteFormProps) {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
-                disabled={isPending}
+                disabled={isPending || hasVoted}
               />
             </div>
         </div>
@@ -87,7 +102,7 @@ export function VoteForm({ colleagues }: VoteFormProps) {
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                   className="grid grid-cols-1 gap-4 md:grid-cols-2"
-                  disabled={isPending}
+                  disabled={isPending || hasVoted}
                 >
                   {filteredColleagues.map((colleague) => (
                     <FormItem key={colleague.id}>
@@ -95,9 +110,9 @@ export function VoteForm({ colleagues }: VoteFormProps) {
                         <RadioGroupItem value={colleague.id} className="sr-only" />
                       </FormControl>
                       <Label
-                        htmlFor={field.name + colleague.id} // Ensure unique id for label
-                        onClick={() => form.setValue('candidateId', colleague.id)}
-                        className="flex flex-col rounded-lg border-2 border-muted bg-popover text-popover-foreground transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:shadow-lg cursor-pointer"
+                        htmlFor={field.name + colleague.id}
+                        onClick={() => !hasVoted && form.setValue('candidateId', colleague.id)}
+                        className={`flex flex-col rounded-lg border-2 border-muted bg-popover text-popover-foreground transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:shadow-lg ${hasVoted ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
                       >
                          <RadioGroupItem value={colleague.id} id={field.name + colleague.id} className="sr-only" />
                         <CardContent className="relative flex items-center space-x-4 p-4">
@@ -151,7 +166,7 @@ export function VoteForm({ colleagues }: VoteFormProps) {
                   placeholder="Explica por qué crees que esta persona merece ser elegida..."
                   className="min-h-[120px] resize-none"
                   {...field}
-                  disabled={isPending}
+                  disabled={isPending || hasVoted}
                 />
               </FormControl>
                <p className="text-sm text-muted-foreground">
@@ -162,16 +177,46 @@ export function VoteForm({ colleagues }: VoteFormProps) {
           )}
         />
         
-        <Button type="submit" className="w-full text-lg py-6" disabled={isPending}>
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Enviando voto...
-            </>
-          ) : (
-            'Enviar Voto'
-          )}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+                type="button" 
+                className="w-full text-lg py-6" 
+                disabled={isPending || hasVoted || !form.watch('candidateId') || !form.watch('reason')}
+            >
+              {hasVoted ? (
+                <>
+                  <Check className="mr-2 h-5 w-5" />
+                  Ya emitiste tu voto
+                </>
+              ) : isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Enviando voto...
+                </>
+              ) : (
+                <>
+                  <Vote className="mr-2 h-5 w-5" />
+                  Enviar Voto
+                </>
+              )}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar tu voto</AlertDialogTitle>
+              <AlertDialogDescription>
+                Estás a punto de votar por <span className="font-bold">{selectedCandidate?.name}</span>. Una vez enviado, no podrás cambiar tu voto. ¿Estás seguro?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
+                {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Confirmando...</> : 'Sí, confirmar voto'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </form>
     </Form>
   );

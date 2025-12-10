@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { LoginSchema, VoteSchema } from '@/lib/schemas';
-import { addVote, hasVoted } from '@/lib/db';
+import { addVote, hasVoted as dbHasVoted } from '@/lib/db';
 import { colleagues } from './data';
 
 const COOKIE_NAME = 'votacompa-user';
@@ -47,13 +47,14 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
     return redirect('/');
   }
 
-  if (hasVoted(userEmployeeId)) {
-     return redirect('/vote/already-voted');
+  if (dbHasVoted(userEmployeeId)) {
+     // This case should be rare as the UI is disabled, but it's a good safeguard.
+     return {
+      error: 'Ya has emitido tu voto.',
+    };
   }
 
   if (!validatedFields.success) {
-    // This is a simplified error handling. 
-    // In a real app, you might want to return specific field errors.
     return {
       error: 'Datos de votación inválidos. Asegúrate de seleccionar un compañero y escribir un motivo.',
     };
@@ -69,7 +70,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
     });
   } catch (error) {
     return {
-      error: 'Ocurrió un error al registrar tu voto. Es posible que ya hayas votado.',
+      error: 'Ocurrió un error al registrar tu voto. Inténtalo de nuevo.',
     };
   }
 
@@ -86,11 +87,14 @@ export async function checkUserAndVoteStatus() {
     const user = colleagues.find(c => c.id === userEmployeeId);
     if (!user) {
         // This case should ideally not happen if login is correct
+        cookies().delete(COOKIE_NAME);
         redirect('/');
     }
 
-    if (hasVoted(userEmployeeId)) {
-        redirect('/vote/already-voted');
-    }
-    return user.name;
+    const userHasVoted = dbHasVoted(userEmployeeId);
+    
+    return {
+      userName: user.name,
+      hasVoted: userHasVoted,
+    };
 }
