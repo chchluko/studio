@@ -85,7 +85,9 @@ export async function hasVoted(employeeId: string): Promise<boolean> {
       'SELECT COUNT(*) as count FROM votes WHERE voterId = ?',
       [employeeId]
     );
-    return rows[0].count > 0;
+    const count = parseInt(rows[0].count) || 0;
+    console.log(`Checking vote for ${employeeId}: count = ${count}`);
+    return count > 0;
   } catch (error) {
     console.error('Error checking if user has voted:', error);
     return false;
@@ -98,19 +100,25 @@ export async function hasVoted(employeeId: string): Promise<boolean> {
  * @param vote The vote object to add.
  */
 export async function addVote(vote: Omit<Vote, 'timestamp'>): Promise<void> {
+  console.log('Attempting to add vote:', { voterId: vote.voterId, candidateId: vote.candidateId });
+  
   const hasAlreadyVoted = await hasVoted(vote.voterId);
+  console.log(`Has voted check result: ${hasAlreadyVoted}`);
+  
   if (hasAlreadyVoted) {
     throw new Error('El usuario ya ha votado.');
   }
   
   try {
-    await pool.query(
+    const [result] = await pool.query(
       'INSERT INTO votes (voterId, candidateId, reason, timestamp) VALUES (?, ?, ?, ?)',
       [vote.voterId, vote.candidateId, vote.reason, new Date()]
     );
-    console.log('Vote added for voter:', vote.voterId);
-  } catch (error) {
+    console.log('Vote added successfully for voter:', vote.voterId, 'Result:', result);
+  } catch (error: any) {
     console.error('Error adding vote:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     throw error;
   }
 }
