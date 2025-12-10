@@ -131,7 +131,7 @@ export function VoteForm({ colleagues, hasVoted }: VoteFormProps) {
                           </Avatar>
                           <div className="flex-1 space-y-1">
                             <p className="font-semibold">{colleague.name}</p>
-                            <p className="text-sm text-muted-foreground">{colleague.role}</p>
+                            <p className="text-sm text-muted-foreground">{colleague.department}</p>
                           </div>
                            {form.watch('candidateId') === colleague.id && (
                              <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">

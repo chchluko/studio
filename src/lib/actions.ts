@@ -116,11 +116,11 @@ export async function bulkUploadAction(values: z.infer<typeof BulkUploadSchema>)
   try {
     const lines = csvData.trim().split('\n');
     const newColleagues: Colleague[] = lines.map(line => {
-      const [id, name, role] = line.split(',').map(item => item.trim());
-      if (!id || !name || !role) {
-        throw new Error('Cada línea debe contener ID, Nombre y Rol separados por comas.');
+      const [id, name, department] = line.split(',').map(item => item.trim());
+      if (!id || !name || !department) {
+        throw new Error('Cada línea debe contener ID, Nombre y Departamento separados por comas.');
       }
-      return { id, name, role, photoUrl: null, photoHint: null };
+      return { id, name, department, photoUrl: null, photoHint: null };
     });
 
     await setColleagues(newColleagues);

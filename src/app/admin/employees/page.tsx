@@ -58,7 +58,7 @@ export default async function EmployeesPage() {
                             <TableHead className="font-semibold w-[100px]">Foto</TableHead>
                             <TableHead className="font-semibold">Nómina (ID)</TableHead>
                             <TableHead className="font-semibold">Nombre</TableHead>
-                            <TableHead className="font-semibold">Rol</TableHead>
+                            <TableHead className="font-semibold">Departamento</TableHead>
                         </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -73,7 +73,7 @@ export default async function EmployeesPage() {
                                     </TableCell>
                                     <TableCell className="font-mono">{colleague.id}</TableCell>
                                     <TableCell>{colleague.name}</TableCell>
-                                    <TableCell>{colleague.role}</TableCell>
+                                    <TableCell>{colleague.department}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
