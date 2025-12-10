@@ -36,6 +36,8 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
     maxAge: 60 * 60 * 24, // 1 day
     path: '/',
   });
+  
+  console.log('Cookie set for user:', employeeId);
 
   redirect('/vote');
 }
@@ -98,14 +100,22 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
 export async function checkUserAndVoteStatus() {
     const cookieStore = await cookies();
     const userEmployeeId = cookieStore.get(COOKIE_NAME)?.value;
+    console.log('checkUserAndVoteStatus - userEmployeeId:', userEmployeeId);
+    
     const colleagues = await getColleagues();
+    console.log('checkUserAndVoteStatus - total colleagues:', colleagues.length);
+    
     if (!userEmployeeId) {
+        console.log('No userEmployeeId found, redirecting to home');
         redirect('/');
     }
 
     const user = colleagues.find(c => c.id === userEmployeeId);
+    console.log('checkUserAndVoteStatus - user found:', user ? user.name : 'NOT FOUND');
+    
     if (!user) {
         // This case should ideally not happen if login is correct
+        console.log('User not found in colleagues, deleting cookie and redirecting');
         cookieStore.delete(COOKIE_NAME);
         redirect('/');
     }

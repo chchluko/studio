@@ -14,8 +14,9 @@ export const ADMIN_EMPLOYEE_ID = '15774';
  * Verifica si el usuario actual es administrador
  * @returns true si el usuario tiene permisos de administrador
  */
-export function isCurrentUserAdmin(): boolean {
-  const userEmployeeId = cookies().get(COOKIE_NAME)?.value;
+export async function isCurrentUserAdmin(): Promise<boolean> {
+  const cookieStore = await cookies();
+  const userEmployeeId = cookieStore.get(COOKIE_NAME)?.value;
   return userEmployeeId === ADMIN_EMPLOYEE_ID;
 }
 
