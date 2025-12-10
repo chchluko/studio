@@ -4,8 +4,8 @@ export interface Colleague {
   id: string;
   name: string;
   role: string;
-  photoUrl: string;
-  photoHint: string;
+  photoUrl: string | null;
+  photoHint: string | null;
 }
 
 const colleaguesData = [
@@ -18,16 +18,11 @@ const colleaguesData = [
 export const colleagues: Colleague[] = colleaguesData.map((colleague) => {
     const placeholder = PlaceHolderImages.find(p => p.id === `colleague-${colleague.id}`);
 
-    if (!placeholder) {
-        // In a real app, you might have a default placeholder
-        throw new Error(`Placeholder image not found for colleague id: ${colleague.id}`);
-    }
-    
     return {
         id: colleague.id,
         name: colleague.name,
         role: colleague.role,
-        photoUrl: placeholder.imageUrl,
-        photoHint: placeholder.imageHint
+        photoUrl: placeholder?.imageUrl || null,
+        photoHint: placeholder?.imageHint || null
     }
 });
