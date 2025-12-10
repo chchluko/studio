@@ -40,9 +40,10 @@ import {
 interface VoteFormProps {
   colleagues: Colleague[];
   hasVoted: boolean;
+  userId: string;
 }
 
-export function VoteForm({ colleagues, hasVoted }: VoteFormProps) {
+export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -57,7 +58,7 @@ export function VoteForm({ colleagues, hasVoted }: VoteFormProps) {
 
   const onSubmit = (values: z.infer<typeof VoteSchema>) => {
     startTransition(async () => {
-      const result = await voteAction(values);
+      const result = await voteAction({ ...values, voterId: userId });
       if (result?.error) {
         toast({
           title: 'Error en la votación',

@@ -23,7 +23,7 @@ export default async function VotePage() {
           </div>
         </header>
 
-        <VoteForm colleagues={allColleagues} hasVoted={hasVoted} />
+        <VoteForm colleagues={allColleagues} hasVoted={hasVoted} userId={user.id} />
       </div>
     </main>
   );

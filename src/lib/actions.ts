@@ -44,27 +44,7 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
 
 export async function voteAction(values: z.infer<typeof VoteSchema>) {
   const validatedFields = VoteSchema.safeParse(values);
-  const cookieStore = await cookies();
-  const userEmployeeId = cookieStore.get(COOKIE_NAME)?.value;
-
-  console.log('VoteAction called for user:', userEmployeeId);
-
-  if (!userEmployeeId) {
-    console.log('No user ID found, redirecting to home');
-    return redirect('/');
-  }
-
-  const hasVoted = await dbHasVoted(userEmployeeId);
-  console.log(`User ${userEmployeeId} has voted: ${hasVoted}`);
   
-  if (hasVoted) {
-     // This case should be rare as the UI is disabled, but it's a good safeguard.
-     console.log('User already voted, returning error');
-     return {
-      error: 'Ya has emitido tu voto.',
-    };
-  }
-
   if (!validatedFields.success) {
     console.log('Validation failed:', validatedFields.error);
     return {
@@ -72,18 +52,39 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
     };
   }
 
-  const { candidateId, reason } = validatedFields.data;
-  console.log('Calling addVote with:', { voterId: userEmployeeId, candidateId });
+  const { voterId, candidateId, reason } = validatedFields.data;
+  
+  if (!voterId) {
+    console.log('No voterId provided');
+    return {
+      error: 'Error de sesión. Por favor, inicia sesión nuevamente.',
+    };
+  }
+
+  console.log('VoteAction called for user:', voterId);
+
+  const hasVoted = await dbHasVoted(voterId);
+  console.log(`User ${voterId} has voted: ${hasVoted}`);
+  
+  if (hasVoted) {
+     console.log('User already voted, returning error');
+     return {
+      error: 'Ya has emitido tu voto.',
+    };
+  }
+
+  console.log('Calling addVote with:', { voterId, candidateId });
 
   try {
     await addVote({
-      voterId: userEmployeeId,
+      voterId,
       candidateId,
       reason,
     });
     
     console.log('Vote added successfully, deleting cookie');
     // Cerrar sesión después de votar
+    const cookieStore = await cookies();
     cookieStore.delete(COOKIE_NAME);
   } catch (error: any) {
     console.error('Error in voteAction:', error);
