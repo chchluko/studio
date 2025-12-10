@@ -5,14 +5,15 @@ import { z } from 'zod';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { LoginSchema, VoteSchema, BulkUploadSchema } from '@/lib/schemas';
-import { addVote, hasVoted as dbHasVoted, getColleagues, setColleagues } from '@/lib/db';
+import { addVote, hasVoted as dbHasVoted, getColleagues, setColleagues, uploadPhotoAndUpdateProfile } from '@/lib/db';
 import type { Colleague } from './data';
+import { revalidatePath } from 'next/cache';
 
 const COOKIE_NAME = 'votacompa-user';
 
 export async function loginAction(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values);
-  const colleagues = getColleagues();
+  const colleagues = await getColleagues();
 
   if (!validatedFields.success) {
     return {
@@ -48,8 +49,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
     return redirect('/');
   }
 
-  if (dbHasVoted(userEmployeeId)) {
-     // This case should be rare as the UI is disabled, but it's a good safeguard.
+  if (await dbHasVoted(userEmployeeId)) {
      return {
       error: 'Ya has emitido tu voto.',
     };
@@ -64,7 +64,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
   const { candidateId, reason } = validatedFields.data;
 
   try {
-    addVote({
+    await addVote({
       voterId: userEmployeeId,
       candidateId,
       reason,
@@ -81,10 +81,11 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
 
 export async function checkUserAndVoteStatus() {
     const userEmployeeId = cookies().get(COOKIE_NAME)?.value;
-    const colleagues = getColleagues();
     if (!userEmployeeId) {
         redirect('/');
     }
+    
+    const colleagues = await getColleagues();
 
     const user = colleagues.find(c => c.id === userEmployeeId);
     if (!user) {
@@ -93,7 +94,7 @@ export async function checkUserAndVoteStatus() {
         redirect('/');
     }
 
-    const userHasVoted = dbHasVoted(userEmployeeId);
+    const userHasVoted = await dbHasVoted(userEmployeeId);
     
     return {
       user: user,
@@ -124,7 +125,10 @@ export async function bulkUploadAction(values: z.infer<typeof BulkUploadSchema>)
       return { id, name, role, photoUrl: null, photoHint: null };
     });
 
-    setColleagues(newColleagues);
+    await setColleagues(newColleagues);
+
+    revalidatePath('/admin/employees');
+    revalidatePath('/vote');
 
     return {
       error: null,
@@ -136,5 +140,22 @@ export async function bulkUploadAction(values: z.infer<typeof BulkUploadSchema>)
       error: error.message || 'Error al procesar los datos.',
       success: null,
     }
+  }
+}
+
+export async function uploadPhotoAction(userId: string, formData: FormData) {
+  const file = formData.get('picture') as File;
+
+  if (!file || file.size === 0) {
+    return { error: 'Por favor, selecciona una imagen.' };
+  }
+
+  try {
+    const newPhotoUrl = await uploadPhotoAndUpdateProfile(userId, file);
+    revalidatePath('/vote'); // To refresh the user's photo
+    return { success: '¡Foto actualizada con éxito!', newPhotoUrl };
+  } catch (error: any) {
+    console.error('Upload error:', error);
+    return { error: 'No se pudo subir la foto. Inténtalo de nuevo.' };
   }
 }

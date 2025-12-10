@@ -16,8 +16,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const dynamic = 'force-dynamic';
 
-export default function EmployeesPage() {
-  const colleagues = getColleagues();
+export default async function EmployeesPage() {
+  const colleagues = await getColleagues();
 
   return (
     <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">

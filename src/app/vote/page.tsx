@@ -6,7 +6,10 @@ import { UploadPhoto } from './upload-photo';
 
 export default async function VotePage() {
   const { userName, hasVoted, user } = await checkUserAndVoteStatus();
-  const allColleagues = getColleagues();
+  const allColleagues = await getColleagues();
+  // The current user should not be able to vote for themselves.
+  const colleaguesToVote = allColleagues.filter(c => c.id !== user.id);
+
 
   return (
     <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
@@ -23,7 +26,7 @@ export default async function VotePage() {
           </div>
         </header>
 
-        <VoteForm colleagues={allColleagues} hasVoted={hasVoted} />
+        <VoteForm colleagues={colleaguesToVote} hasVoted={hasVoted} />
       </div>
     </main>
   );

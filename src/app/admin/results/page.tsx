@@ -18,9 +18,9 @@ import { ArrowLeft } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-export default function ResultsPage() {
-  const votes = getVotes();
-  const colleagues = getColleagues();
+export default async function ResultsPage() {
+  const votes = await getVotes();
+  const colleagues = await getColleagues();
   
   const votesWithNames = votes.map(vote => {
     const voter = colleagues.find(c => c.id === vote.voterId);
