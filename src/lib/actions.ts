@@ -29,7 +29,8 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
     }
   }
   
-  cookies().set(COOKIE_NAME, employeeId, {
+  const cookieStore = await cookies();
+  cookieStore.set(COOKIE_NAME, employeeId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     maxAge: 60 * 60 * 24, // 1 day
@@ -41,7 +42,8 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
 
 export async function voteAction(values: z.infer<typeof VoteSchema>) {
   const validatedFields = VoteSchema.safeParse(values);
-  const userEmployeeId = cookies().get(COOKIE_NAME)?.value;
+  const cookieStore = await cookies();
+  const userEmployeeId = cookieStore.get(COOKIE_NAME)?.value;
 
   console.log('VoteAction called for user:', userEmployeeId);
 
@@ -80,7 +82,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
     
     console.log('Vote added successfully, deleting cookie');
     // Cerrar sesión después de votar
-    cookies().delete(COOKIE_NAME);
+    cookieStore.delete(COOKIE_NAME);
   } catch (error: any) {
     console.error('Error in voteAction:', error);
     return {
@@ -94,7 +96,8 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
 
 
 export async function checkUserAndVoteStatus() {
-    const userEmployeeId = cookies().get(COOKIE_NAME)?.value;
+    const cookieStore = await cookies();
+    const userEmployeeId = cookieStore.get(COOKIE_NAME)?.value;
     const colleagues = await getColleagues();
     if (!userEmployeeId) {
         redirect('/');
@@ -103,7 +106,7 @@ export async function checkUserAndVoteStatus() {
     const user = colleagues.find(c => c.id === userEmployeeId);
     if (!user) {
         // This case should ideally not happen if login is correct
-        cookies().delete(COOKIE_NAME);
+        cookieStore.delete(COOKIE_NAME);
         redirect('/');
     }
 
