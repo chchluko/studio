@@ -6,7 +6,7 @@ import { UploadPhoto } from './upload-photo';
 
 export default async function VotePage() {
   const { userName, hasVoted, user } = await checkUserAndVoteStatus();
-  const allColleagues = getColleagues();
+  const allColleagues = await getColleagues();
 
   return (
     <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">

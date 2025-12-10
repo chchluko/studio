@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'VotaCompa - Votación de Compañeros',
-  description: 'Aplicación para votar por tu compañero de trabajo preferido.',
+  title: 'VotaTI - Votación de Compañeros TI',
+  description: 'Aplicación para votar por tu compañero de trabajo preferido del área de TI.',
 };
 
 export default function RootLayout({

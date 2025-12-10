@@ -13,11 +13,16 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { redirect } from 'next/navigation';
+import { isCurrentUserAdmin } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
-export default function EmployeesPage() {
-  const colleagues = getColleagues();
+export default async function EmployeesPage() {
+  if (!isCurrentUserAdmin()) {
+    redirect('/');
+  }
+  const colleagues = await getColleagues();
 
   return (
     <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">

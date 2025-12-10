@@ -15,12 +15,17 @@ import { es } from 'date-fns/locale';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { isCurrentUserAdmin } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
-export default function ResultsPage() {
-  const votes = getVotes();
-  const colleagues = getColleagues();
+export default async function ResultsPage() {
+  if (!isCurrentUserAdmin()) {
+    redirect('/');
+  }
+  const votes = await getVotes();
+  const colleagues = await getColleagues();
   
   const votesWithNames = votes.map(vote => {
     const voter = colleagues.find(c => c.id === vote.voterId);

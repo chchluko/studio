@@ -4,8 +4,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { BarChart, Upload, Users } from 'lucide-react';
+import { isCurrentUserAdmin } from '@/lib/constants';
 
 export default function Home() {
+  const isAdmin = isCurrentUserAdmin();
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
@@ -25,26 +28,28 @@ export default function Home() {
             <LoginForm />
           </CardContent>
         </Card>
-        <div className="flex flex-wrap justify-center gap-4">
+        {isAdmin && (
+          <div className="flex flex-wrap justify-center gap-4">
             <Button variant="link" asChild>
-                <Link href="/admin/results">
-                    <BarChart className="mr-2 h-4 w-4" />
-                    Ver resultados
-                </Link>
-            </Button>
-             <Button variant="link" asChild>
-                <Link href="/admin/upload">
-                    <Upload className="mr-2 h-4 w-4" />
-                    Carga Masiva
-                </Link>
+              <Link href="/admin/results">
+                <BarChart className="mr-2 h-4 w-4" />
+                Ver resultados
+              </Link>
             </Button>
             <Button variant="link" asChild>
-                <Link href="/admin/employees">
-                    <Users className="mr-2 h-4 w-4" />
-                    Ver Empleados
-                </Link>
+              <Link href="/admin/upload">
+                <Upload className="mr-2 h-4 w-4" />
+                Carga Masiva
+              </Link>
             </Button>
-        </div>
+            <Button variant="link" asChild>
+              <Link href="/admin/employees">
+                <Users className="mr-2 h-4 w-4" />
+                Ver Empleados
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
     </main>
   );

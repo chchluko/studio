@@ -7,12 +7,11 @@ import { redirect } from 'next/navigation';
 import { LoginSchema, VoteSchema, BulkUploadSchema } from '@/lib/schemas';
 import { addVote, hasVoted as dbHasVoted, getColleagues, setColleagues } from '@/lib/db';
 import type { Colleague } from './data';
-
-const COOKIE_NAME = 'votacompa-user';
+import { COOKIE_NAME } from '@/lib/constants';
 
 export async function loginAction(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values);
-  const colleagues = getColleagues();
+  const colleagues = await getColleagues();
 
   if (!validatedFields.success) {
     return {
@@ -48,7 +47,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
     return redirect('/');
   }
 
-  if (dbHasVoted(userEmployeeId)) {
+  if (await dbHasVoted(userEmployeeId)) {
      // This case should be rare as the UI is disabled, but it's a good safeguard.
      return {
       error: 'Ya has emitido tu voto.',
@@ -64,7 +63,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
   const { candidateId, reason } = validatedFields.data;
 
   try {
-    addVote({
+    await addVote({
       voterId: userEmployeeId,
       candidateId,
       reason,
@@ -81,7 +80,7 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
 
 export async function checkUserAndVoteStatus() {
     const userEmployeeId = cookies().get(COOKIE_NAME)?.value;
-    const colleagues = getColleagues();
+    const colleagues = await getColleagues();
     if (!userEmployeeId) {
         redirect('/');
     }
@@ -93,7 +92,7 @@ export async function checkUserAndVoteStatus() {
         redirect('/');
     }
 
-    const userHasVoted = dbHasVoted(userEmployeeId);
+    const userHasVoted = await dbHasVoted(userEmployeeId);
     
     return {
       user: user,
@@ -124,7 +123,7 @@ export async function bulkUploadAction(values: z.infer<typeof BulkUploadSchema>)
       return { id, name, role, photoUrl: null, photoHint: null };
     });
 
-    setColleagues(newColleagues);
+    await setColleagues(newColleagues);
 
     return {
       error: null,
