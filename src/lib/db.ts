@@ -9,22 +9,31 @@ interface Vote {
   timestamp: Date;
 }
 
-// Connection pool configuration
+// Parse DATABASE_URL and create connection pool
+const dbUrl = process.env.DATABASE_URL || 'mysql://root:password@localhost:3306/votacompa';
+const url = new URL(dbUrl);
+
 const pool = mysql.createPool({
-  uri: process.env.DATABASE_URL,
+  host: url.hostname,
+  port: parseInt(url.port) || 3306,
+  user: url.username,
+  password: url.password,
+  database: url.pathname.substring(1),
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
 });
 
 /**
  * Gets the current list of colleagues from MySQL.
- * @returns An array of colleagues.
+ * @returns An array of colleagues ordered alphabetically by name.
  */
 export async function getColleagues(): Promise<Colleague[]> {
   try {
     const [rows] = await pool.query<any[]>(
-      'SELECT id, name, department, photoUrl FROM colleagues'
+      'SELECT id, name, department, photoUrl FROM colleagues ORDER BY name ASC'
     );
     return rows;
   } catch (error) {
