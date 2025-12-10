@@ -29,4 +29,13 @@ export function addVote(vote: Omit<Vote, 'timestamp'>): void {
   }
   const newVote = { ...vote, timestamp: new Date() };
   votes.push(newVote);
+  console.log('Current votes:', votes);
+}
+
+/**
+ * Gets all votes from the in-memory store.
+ * @returns An array of all votes.
+ */
+export function getVotes(): Vote[] {
+    return votes;
 }

@@ -1,6 +1,9 @@
 import { LoginForm } from '@/components/login-form';
 import { VotaCompaLogo } from '@/components/votacompa-logo';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { BarChart } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -22,6 +25,14 @@ export default function Home() {
             <LoginForm />
           </CardContent>
         </Card>
+        <div className="text-center">
+            <Button variant="link" asChild>
+                <Link href="/admin/results">
+                    <BarChart className="mr-2 h-4 w-4" />
+                    Ver resultados
+                </Link>
+            </Button>
+        </div>
       </div>
     </main>
   );
