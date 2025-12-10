@@ -13,6 +13,14 @@ const colleaguesData = [
   { id: '2', name: 'Carlos García', role: 'Desarrollador Backend' },
   { id: '3', name: 'Luisa Fernández', role: 'Gerente de Proyecto' },
   { id: '4', name: 'Jorge Martínez', role: 'Ingeniero de Datos' },
+  { id: '5', name: 'Sofía Rodríguez', role: 'Analista de Negocios' },
+  { id: '6', name: 'Miguel González', role: 'Especialista en Marketing' },
+  { id: '7', name: 'Valentina Torres', role: 'Desarrolladora Frontend' },
+  { id: '8', name: 'Diego Rojas', role: 'Administrador de Sistemas' },
+  { id: '9', name: 'Camila Díaz', role: 'Soporte Técnico' },
+  { id: '10', name: 'Mateo Castillo', role: 'Diseñador Gráfico' },
+  { id: '11', name: 'Isabella Vargas', role: 'Analista de Calidad (QA)' },
+  { id: '12', name: 'Sebastián Morales', role: 'Scrum Master' },
 ];
 
 export const colleagues: Colleague[] = colleaguesData.map((colleague) => {

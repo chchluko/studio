@@ -23,6 +23,54 @@
       "description": "Foto de Jorge Martínez",
       "imageUrl": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBnbGFzc2VzfGVufDB8fHx8MTc2NTMwOTgyMHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "man glasses"
+    },
+    {
+      "id": "colleague-5",
+      "description": "Foto de Sofía Rodríguez",
+      "imageUrl": "https://images.unsplash.com/photo-1573497019236-17f8177b81e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3NjUzNDQ3Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman professional"
+    },
+    {
+      "id": "colleague-6",
+      "description": "Foto de Miguel González",
+      "imageUrl": "https://images.unsplash.com/photo-1725866546799-4cc16f6cba23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBzbWlsaW5nfGVufDB8fHx8MTc2NTI4ODQ3M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man smiling"
+    },
+    {
+      "id": "colleague-7",
+      "description": "Foto de Valentina Torres",
+      "imageUrl": "https://images.unsplash.com/photo-1662848586769-314289d4c8b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx3b21hbiUyMGdsYXNzZXN8ZW58MHx8fHwxNzY1MjcyOTYzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman glasses"
+    },
+    {
+      "id": "colleague-8",
+      "description": "Foto de Diego Rojas",
+      "imageUrl": "https://images.unsplash.com/photo-1607031542107-f6f46b5d54e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjUyODg5NjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "colleague-9",
+      "description": "Foto de Camila Díaz",
+      "imageUrl": "https://images.unsplash.com/photo-1664813495783-a7b19be83624?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3b21hbiUyMG91dGRvb3JzfGVufDB8fHx8MTc2NTMxNzUxNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman outdoors"
+    },
+    {
+      "id": "colleague-10",
+      "description": "Foto de Mateo Castillo",
+      "imageUrl": "https://images.unsplash.com/photo-1665832102447-a853788f620c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtYW4lMjBjYXN1YWx8ZW58MHx8fHwxNzY1MzE3MDc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man casual"
+    },
+    {
+      "id": "colleague-11",
+      "description": "Foto de Isabella Vargas",
+      "imageUrl": "https://images.unsplash.com/photo-1763259405836-a86fcbc039b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3b21hbiUyMHNtaWxpbmclMjBwcm9mZXNzaW9uYWx8ZW58MHx8fHwxNzY1MzcxOTg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman smiling professional"
+    },
+    {
+      "id": "colleague-12",
+      "description": "Foto de Sebastián Morales",
+      "imageUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBvZmZpY2V8ZW58MHx8fHwxNzY1MzAwNzIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man office"
     }
   ]
 }
