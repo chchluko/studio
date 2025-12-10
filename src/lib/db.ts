@@ -1,3 +1,4 @@
+
 'use server';
 
 import {
@@ -11,20 +12,22 @@ import {
   writeBatch,
   addDoc,
   serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { initializeFirebase } from '@/firebase';
+import { initializeFirebaseAdmin } from '@/firebase/server';
 import type { Colleague } from './data';
 import type { Vote } from './schemas';
 
-// This file now interacts with Firebase instead of an in-memory store.
 
-function getDb() {
-  return initializeFirebase().firestore;
+async function getDb() {
+  const { firestore } = await initializeFirebaseAdmin();
+  return firestore;
 }
 
-function getStore() {
-    return initializeFirebase().storage;
+async function getStore() {
+    const { storage } = await initializeFirebaseAdmin();
+    return storage;
 }
 
 
@@ -33,7 +36,7 @@ function getStore() {
  * @returns An array of colleagues.
  */
 export async function getColleagues(): Promise<Colleague[]> {
-  const db = getDb();
+  const db = await getDb();
   const colleaguesCol = collection(db, 'candidates');
   const snapshot = await getDocs(colleaguesCol);
   return snapshot.docs.map((doc) => ({ ...(doc.data() as Colleague), id: doc.id }));
@@ -45,7 +48,7 @@ export async function getColleagues(): Promise<Colleague[]> {
  * @param newColleagues The new array of colleagues.
  */
 export async function setColleagues(newColleagues: Colleague[]): Promise<void> {
-  const db = getDb();
+  const db = await getDb();
   const batch = writeBatch(db);
   const colleaguesColRef = collection(db, 'candidates');
 
@@ -69,7 +72,7 @@ export async function setColleagues(newColleagues: Colleague[]): Promise<void> {
  * @returns `true` if the user has voted, `false` otherwise.
  */
 export async function hasVoted(userId: string): Promise<boolean> {
-  const db = getDb();
+  const db = await getDb();
   const votesCol = collection(db, 'votes');
   const q = query(votesCol, where('voterId', '==', userId));
   const snapshot = await getDocs(q);
@@ -82,7 +85,7 @@ export async function hasVoted(userId: string): Promise<boolean> {
  * @param vote The vote object to add.
  */
 export async function addVote(vote: Omit<Vote, 'timestamp' | 'id'>): Promise<void> {
-    const db = getDb();
+    const db = await getDb();
     if (await hasVoted(vote.voterId)) {
         throw new Error('El usuario ya ha votado.');
     }
@@ -95,10 +98,18 @@ export async function addVote(vote: Omit<Vote, 'timestamp' | 'id'>): Promise<voi
  * @returns An array of all votes.
  */
 export async function getVotes(): Promise<(Vote & {id: string})[]> {
-    const db = getDb();
+    const db = await getDb();
     const votesCol = collection(db, 'votes');
     const snapshot = await getDocs(votesCol);
-    return snapshot.docs.map(doc => ({ ...(doc.data() as Vote), id: doc.id, timestamp: doc.data().timestamp.toDate() }));
+    return snapshot.docs.map(doc => {
+        const data = doc.data();
+        const timestamp = data.timestamp as Timestamp;
+        return { 
+            ...(data as Vote), 
+            id: doc.id, 
+            timestamp: timestamp.toDate() 
+        };
+    });
 }
 
 /**
@@ -108,8 +119,8 @@ export async function getVotes(): Promise<(Vote & {id: string})[]> {
  * @returns The new public URL of the photo.
  */
 export async function uploadPhotoAndUpdateProfile(userId: string, file: File): Promise<string> {
-    const storage = getStore();
-    const db = getDb();
+    const storage = await getStore();
+    const db = await getDb();
 
     // Create a storage reference
     const storageRef = ref(storage, `profile-photos/${userId}/${file.name}`);
