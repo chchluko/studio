@@ -43,7 +43,7 @@ export default async function ResultsPage() {
       <RefreshHandler />
        <div className="absolute left-4 top-4">
         <Button asChild variant="outline">
-            <Link href="/">
+            <Link href="/vote">
                 <ArrowLeft className="mr-2" />
                 Volver
             </Link>

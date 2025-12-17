@@ -29,7 +29,7 @@ export default async function EmployeesPage() {
     <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
        <div className="absolute left-4 top-4">
         <Button asChild variant="outline">
-            <Link href="/">
+            <Link href="/vote">
                 <ArrowLeft className="mr-2" />
                 Volver
             </Link>
@@ -59,7 +59,7 @@ export default async function EmployeesPage() {
                             <TableHead className="font-semibold w-[100px]">Foto</TableHead>
                             <TableHead className="font-semibold">Nómina (ID)</TableHead>
                             <TableHead className="font-semibold">Nombre</TableHead>
-                            <TableHead className="font-semibold">Departamento</TableHead>
+                            <TableHead className="font-semibold">Puesto</TableHead>
                         </TableRow>
                         </TableHeader>
                         <TableBody>

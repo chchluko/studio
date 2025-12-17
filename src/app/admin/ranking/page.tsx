@@ -50,7 +50,7 @@ export default async function RankingPage() {
     <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
       <div className="absolute left-4 top-4">
         <Button asChild variant="outline">
-          <Link href="/">
+          <Link href="/vote">
             <ArrowLeft className="mr-2" />
             Volver
           </Link>
@@ -85,7 +85,7 @@ export default async function RankingPage() {
                     <TableHead className="font-semibold w-[80px]">Posición</TableHead>
                     <TableHead className="font-semibold w-[100px]">Foto</TableHead>
                     <TableHead className="font-semibold">Nombre</TableHead>
-                    <TableHead className="font-semibold">Departamento</TableHead>
+                    <TableHead className="font-semibold">Puesto</TableHead>
                     <TableHead className="font-semibold text-right">Votos</TableHead>
                   </TableRow>
                 </TableHeader>
