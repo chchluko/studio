@@ -4,8 +4,8 @@
 import { z } from 'zod';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { LoginSchema, VoteSchema, BulkUploadSchema } from '@/lib/schemas';
-import { addVote, hasVoted as dbHasVoted, getColleagues, setColleagues } from '@/lib/db';
+import { LoginSchema, VoteSchema, BulkUploadSchema, PhotoUploadSchema } from '@/lib/schemas';
+import { addVote, hasVoted as dbHasVoted, getColleagues, setColleagues, updateUserPhoto } from '@/lib/db';
 import type { Colleague } from './data';
 import { COOKIE_NAME } from '@/lib/constants';
 
@@ -171,5 +171,38 @@ export async function bulkUploadAction(values: z.infer<typeof BulkUploadSchema>)
       error: error.message || 'Error al procesar los datos.',
       success: null,
     }
+  }
+}
+
+export async function updatePhotoAction(values: z.infer<typeof PhotoUploadSchema>) {
+  const validatedFields = PhotoUploadSchema.safeParse(values);
+  
+  if (!validatedFields.success) {
+    return {
+      error: 'URL de foto inválida.',
+    };
+  }
+  
+  const cookieStore = await cookies();
+  const userEmployeeId = cookieStore.get(COOKIE_NAME)?.value;
+  
+  if (!userEmployeeId) {
+    return {
+      error: 'Sesión no válida. Por favor, inicia sesión nuevamente.',
+    };
+  }
+  
+  const { photoUrl } = validatedFields.data;
+  
+  try {
+    await updateUserPhoto(userEmployeeId, photoUrl);
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error('Update photo error:', error);
+    return {
+      error: 'No se pudo actualizar la foto. Intenta nuevamente.',
+    };
   }
 }

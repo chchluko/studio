@@ -14,3 +14,7 @@ export const VoteSchema = z.object({
 export const BulkUploadSchema = z.object({
     csvData: z.string().min(1, { message: 'Por favor, introduce los datos de los empleados.' }),
 });
+
+export const PhotoUploadSchema = z.object({
+  photoUrl: z.string().url({ message: 'Debe ser una URL válida.' }).min(1, { message: 'Por favor, introduce la URL de la foto.' }),
+});

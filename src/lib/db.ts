@@ -180,3 +180,21 @@ export async function getVotes(): Promise<Vote[]> {
     return [];
   }
 }
+
+/**
+ * Actualiza la URL de la foto de perfil de un empleado.
+ * @param employeeId - ID del empleado
+ * @param photoUrl - Nueva URL de la foto
+ */
+export async function updateUserPhoto(employeeId: string, photoUrl: string): Promise<void> {
+  try {
+    await pool.query(
+      'UPDATE colleagues SET photoUrl = ? WHERE id = ?',
+      [photoUrl, employeeId]
+    );
+    console.log(`Photo updated for employee ${employeeId}`);
+  } catch (error) {
+    console.error('Error updating user photo:', error);
+    throw error;
+  }
+}
