@@ -8,7 +8,7 @@ import { cookies } from 'next/headers';
 export const COOKIE_NAME = 'votacompa-user';
 
 // ID del empleado administrador con acceso a funciones administrativas
-export const ADMIN_EMPLOYEE_ID = '15774';
+export const ADMIN_EMPLOYEE_ID = '4279';
 
 /**
  * Verifica si el usuario actual es administrador

@@ -43,6 +43,48 @@ export async function getColleagues(): Promise<Colleague[]> {
 }
 
 /**
+ * Verifica las credenciales de login (nómina y password).
+ * @param employeeId - Número de nómina del empleado
+ * @param password - Contraseña del empleado
+ * @returns El objeto Colleague si las credenciales son válidas, null si no
+ */
+export async function verifyCredentials(employeeId: string, password: string): Promise<Colleague | null> {
+  try {
+    const [rows] = await pool.query<any[]>(
+      'SELECT id, name, department, photoUrl, account_locked FROM colleagues WHERE id = ? AND password = ?',
+      [employeeId, password]
+    );
+    
+    if (rows.length === 0) {
+      // Registrar intento fallido
+      await pool.query(
+        'UPDATE colleagues SET failed_login_attempts = failed_login_attempts + 1 WHERE id = ?',
+        [employeeId]
+      );
+      return null;
+    }
+    
+    const user = rows[0];
+    
+    // Verificar si la cuenta está bloqueada
+    if (user.account_locked) {
+      return null;
+    }
+    
+    // Login exitoso: resetear intentos fallidos y actualizar last_login
+    await pool.query(
+      'UPDATE colleagues SET failed_login_attempts = 0, last_login = NOW() WHERE id = ?',
+      [employeeId]
+    );
+    
+    return user;
+  } catch (error) {
+    console.error('Error verifying credentials:', error);
+    return null;
+  }
+}
+
+/**
  * Replaces the current list of colleagues with a new one.
  * @param newColleagues The new array of colleagues.
  */

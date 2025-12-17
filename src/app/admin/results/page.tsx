@@ -15,10 +15,16 @@ import { es } from 'date-fns/locale';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { isCurrentUserAdmin } from '@/lib/constants';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ResultsPage() {
+  const isAdmin = await isCurrentUserAdmin();
+  if (!isAdmin) {
+    redirect('/');
+  }
   const votes = await getVotes();
   const colleagues = await getColleagues();
   

@@ -27,6 +27,7 @@ export function LoginForm() {
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       employeeId: '',
+      password: '',
     },
   });
 
@@ -56,6 +57,24 @@ export function LoginForm() {
                 <Input
                   type="text"
                   placeholder="Tu número de nómina"
+                  {...field}
+                  disabled={isPending}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contraseña</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="Tu contraseña"
                   {...field}
                   disabled={isPending}
                 />

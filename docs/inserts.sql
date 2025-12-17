@@ -130,7 +130,7 @@ INSERT INTO votacompa.colleagues (id,name,department,photoUrl,created_at,updated
 	 ('9564','Ernesto Sam Mejía','Ingeniero Soporte Foráneo Querétaro',NULL,'2025-12-10 10:05:04','2025-12-10 10:05:04'),
 	 ('9876','Edith Moreno Jiménez','Jefe Corporativo SAP BW',NULL,'2025-12-10 10:05:04','2025-12-10 10:05:04');
 INSERT INTO votacompa.colleagues (id,name,department,photoUrl,created_at,updated_at) VALUES
-	 ('4279','Oscar Adrián Valladares Contreras','Desarrollador Genexus',NULL,'2025-12-10 10:05:04','2025-12-10 10:05:04'),
+	 ('4279','Oscar Adrián Valladares Contreras','Director Tecnologías de la Información',NULL,'2025-12-10 10:05:04','2025-12-10 10:05:04'),
 	 ('20890','Alejandro Azpe Olmedo','Subdirector Integración de Aplicaciones',NULL,'2025-12-10 10:05:04','2025-12-10 10:05:04');
 
 

@@ -11,21 +11,22 @@ import { COOKIE_NAME } from '@/lib/constants';
 
 export async function loginAction(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values);
-  const colleagues = await getColleagues();
 
   if (!validatedFields.success) {
     return {
-      error: 'Número de nómina inválido.',
+      error: 'Datos de inicio de sesión inválidos.',
     };
   }
   
-  const { employeeId } = validatedFields.data;
+  const { employeeId, password } = validatedFields.data;
 
-  const userExists = colleagues.some(c => c.id === employeeId);
+  // Verificar credenciales
+  const { verifyCredentials } = await import('@/lib/db');
+  const user = await verifyCredentials(employeeId, password);
 
-  if (!userExists) {
+  if (!user) {
     return {
-      error: 'El número de nómina no se encuentra en la lista de empleados autorizados.'
+      error: 'Número de nómina o contraseña incorrectos.'
     }
   }
   
@@ -37,9 +38,15 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
     path: '/',
   });
   
-  console.log('Cookie set for user:', employeeId);
+  console.log('Login successful for user:', employeeId);
 
   redirect('/vote');
+}
+
+export async function logoutAction() {
+  const cookieStore = await cookies();
+  cookieStore.delete(COOKIE_NAME);
+  redirect('/');
 }
 
 export async function voteAction(values: z.infer<typeof VoteSchema>) {

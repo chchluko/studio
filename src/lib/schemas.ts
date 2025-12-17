@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const LoginSchema = z.object({
   employeeId: z.string().min(1, { message: 'Por favor, introduce tu número de nómina.' }),
+  password: z.string().min(1, { message: 'Por favor, introduce tu contraseña.' }),
 });
 
 export const VoteSchema = z.object({
