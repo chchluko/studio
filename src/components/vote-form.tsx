@@ -46,6 +46,7 @@ interface VoteFormProps {
 export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof VoteSchema>>({
@@ -60,11 +61,14 @@ export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
     startTransition(async () => {
       const result = await voteAction({ ...values, voterId: userId });
       if (result?.error) {
+        setShowConfirmDialog(false);
         toast({
           title: 'Error en la votación',
           description: result.error,
           variant: 'destructive',
         });
+      } else {
+        setShowConfirmDialog(false);
       }
     });
   };
@@ -178,10 +182,15 @@ export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
           )}
         />
         
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
+        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
             <Button 
                 type="button" 
+                onClick={async () => {
+                  const isValid = await form.trigger();
+                  if (isValid) {
+                    setShowConfirmDialog(true);
+                  }
+                }}
                 className="w-full text-lg py-6" 
                 disabled={isPending || hasVoted || !form.watch('candidateId') || !form.watch('reason')}
             >
@@ -202,7 +211,6 @@ export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
                 </>
               )}
             </Button>
-          </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Confirmar tu voto</AlertDialogTitle>

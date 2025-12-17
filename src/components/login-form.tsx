@@ -74,11 +74,14 @@ export function LoginForm() {
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="Tu contraseña"
+                  placeholder="AAAAMMDD"
                   {...field}
                   disabled={isPending}
                 />
               </FormControl>
+              <p className="text-sm text-muted-foreground">
+                Usa tu fecha de nacimiento en formato AAAAMMDD (ejemplo: 19900215)
+              </p>
               <FormMessage />
             </FormItem>
           )}
