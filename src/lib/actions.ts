@@ -33,7 +33,8 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, employeeId, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Cambiar a true solo si usas HTTPS
+    sameSite: 'lax',
     maxAge: 60 * 60 * 24, // 1 day
     path: '/',
   });

@@ -15,9 +15,17 @@ export const ADMIN_EMPLOYEE_ID = '4279';
  * @returns true si el usuario tiene permisos de administrador
  */
 export async function isCurrentUserAdmin(): Promise<boolean> {
-  const cookieStore = await cookies();
-  const userEmployeeId = cookieStore.get(COOKIE_NAME)?.value;
-  return userEmployeeId === ADMIN_EMPLOYEE_ID;
+  try {
+    const cookieStore = await cookies();
+    const userEmployeeId = cookieStore.get(COOKIE_NAME)?.value;
+    console.log('isCurrentUserAdmin - Cookie value:', userEmployeeId);
+    console.log('isCurrentUserAdmin - Expected admin ID:', ADMIN_EMPLOYEE_ID);
+    console.log('isCurrentUserAdmin - Is admin:', userEmployeeId === ADMIN_EMPLOYEE_ID);
+    return userEmployeeId === ADMIN_EMPLOYEE_ID;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
 }
 
 /**
