@@ -2,12 +2,90 @@
 'use server';
 
 import { z } from 'zod';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { LoginSchema, VoteSchema, BulkUploadSchema, PhotoUploadSchema } from '@/lib/schemas';
 import { addVote, hasVoted as dbHasVoted, getColleagues, setColleagues, updateUserPhoto } from '@/lib/db';
 import type { Colleague } from './data';
 import { COOKIE_NAME } from '@/lib/constants';
+import { logIpDetection, logVoteAttempt, logLogin } from '@/lib/logger';
+
+/**
+ * Obtiene la dirección IP del cliente desde los headers de la petición
+ */
+async function getClientIp(): Promise<string | undefined> {
+  const headersList = await headers();
+  
+  // Log para debugging: mostrar todos los headers relevantes
+  console.log('=== IP Detection Debug ===');
+  console.log('x-forwarded-for:', headersList.get('x-forwarded-for'));
+  console.log('x-real-ip:', headersList.get('x-real-ip'));
+  console.log('cf-connecting-ip:', headersList.get('cf-connecting-ip'));
+  console.log('x-client-ip:', headersList.get('x-client-ip'));
+  console.log('forwarded:', headersList.get('forwarded'));
+  
+  // Intentar obtener la IP de varios headers comunes (en orden de prioridad)
+  
+  // 1. Cloudflare
+  const cfConnectingIp = headersList.get('cf-connecting-ip');
+  if (cfConnectingIp && cfConnectingIp !== '127.0.0.1') {
+    console.log('IP detectada desde cf-connecting-ip:', cfConnectingIp);
+    await logIpDetection(cfConnectingIp, {
+      'x-forwarded-for': headersList.get('x-forwarded-for'),
+      'x-real-ip': headersList.get('x-real-ip'),
+      'cf-connecting-ip': cfConnectingIp,
+      'x-client-ip': headersList.get('x-client-ip'),
+    });
+    return cfConnectingIp;
+  }
+  
+  // 2. x-forwarded-for (común en proxies y load balancers)
+  const forwardedFor = headersList.get('x-forwarded-for');
+  if (forwardedFor) {
+    // x-forwarded-for puede contener múltiples IPs: "client, proxy1, proxy2"
+    // Tomamos la primera (la del cliente real)
+    const clientIp = forwardedFor.split(',')[0].trim();
+    if (clientIp !== '127.0.0.1') {
+      console.log('IP detectada desde x-forwarded-for:', clientIp);
+      await logIpDetection(clientIp, {
+        'x-forwarded-for': forwardedFor,
+        'x-real-ip': headersList.get('x-real-ip'),
+        'cf-connecting-ip': headersList.get('cf-connecting-ip'),
+        'x-client-ip': headersList.get('x-client-ip'),
+      });
+      return clientIp;
+    }
+  }
+  
+  // 3. x-real-ip (común en Nginx)
+  const realIp = headersList.get('x-real-ip');
+  if (realIp && realIp !== '127.0.0.1') {
+    console.log('IP detectada desde x-real-ip:', realIp);
+    return realIp;
+  }
+  
+  // 4. x-client-ip
+  const clientIp = headersList.get('x-client-ip');
+  if (clientIp && clientIp !== '127.0.0.1') {
+    console.log('IP detectada desde x-client-ip:', clientIp);
+    return clientIp;
+  }
+  
+  // En desarrollo local, será 127.0.0.1
+  // En producción con proxy, los headers arriba tendrán la IP real
+  console.log('No se encontró IP de cliente en headers, usando localhost (desarrollo local)');
+  
+  // Guardar log en archivo
+  const detectedIp = '127.0.0.1';
+  await logIpDetection(detectedIp, {
+    'x-forwarded-for': headersList.get('x-forwarded-for'),
+    'x-real-ip': headersList.get('x-real-ip'),
+    'cf-connecting-ip': headersList.get('cf-connecting-ip'),
+    'x-client-ip': headersList.get('x-client-ip'),
+  });
+  
+  return detectedIp;
+}
 
 export async function loginAction(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values);
@@ -20,11 +98,15 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
   
   const { employeeId, password } = validatedFields.data;
 
+  // Obtener IP para logging
+  const clientIp = await getClientIp();
+
   // Verificar credenciales
   const { verifyCredentials } = await import('@/lib/db');
   const user = await verifyCredentials(employeeId, password);
 
   if (!user) {
+    await logLogin(employeeId, false, clientIp);
     return {
       error: 'Número de nómina o contraseña incorrectos.'
     }
@@ -40,6 +122,7 @@ export async function loginAction(values: z.infer<typeof LoginSchema>) {
   });
   
   console.log('Login successful for user:', employeeId);
+  await logLogin(employeeId, true, clientIp);
 
   redirect('/vote');
 }
@@ -81,21 +164,26 @@ export async function voteAction(values: z.infer<typeof VoteSchema>) {
     };
   }
 
-  console.log('Calling addVote with:', { voterId, candidateId });
+  // Obtener la IP del cliente
+  const clientIp = await getClientIp();
+  console.log('Calling addVote with:', { voterId, candidateId, ip: clientIp });
 
   try {
     await addVote({
       voterId,
       candidateId,
       reason,
+      ip_address: clientIp,
     });
     
+    await logVoteAttempt(voterId, candidateId, clientIp, true);
     console.log('Vote added successfully, deleting cookie');
     // Cerrar sesión después de votar
     const cookieStore = await cookies();
     cookieStore.delete(COOKIE_NAME);
   } catch (error: any) {
     console.error('Error in voteAction:', error);
+    await logVoteAttempt(voterId, candidateId, clientIp, false, error.message);
     return {
       error: 'Ocurrió un error al registrar tu voto. Inténtalo de nuevo.',
     };

@@ -6,6 +6,7 @@ interface Vote {
   voterId: string;
   candidateId: string;
   reason: string;
+  ip_address?: string;
   timestamp: Date;
 }
 
@@ -153,10 +154,10 @@ export async function addVote(vote: Omit<Vote, 'timestamp'>): Promise<void> {
   
   try {
     const [result] = await pool.query(
-      'INSERT INTO votes (voterId, candidateId, reason, timestamp) VALUES (?, ?, ?, ?)',
-      [vote.voterId, vote.candidateId, vote.reason, new Date()]
+      'INSERT INTO votes (voterId, candidateId, reason, ip_address, timestamp) VALUES (?, ?, ?, ?, ?)',
+      [vote.voterId, vote.candidateId, vote.reason, vote.ip_address || null, new Date()]
     );
-    console.log('Vote added successfully for voter:', vote.voterId, 'Result:', result);
+    console.log('Vote added successfully for voter:', vote.voterId, 'IP:', vote.ip_address, 'Result:', result);
   } catch (error: any) {
     console.error('Error adding vote:', error);
     console.error('Error code:', error.code);

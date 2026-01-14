@@ -43,3 +43,10 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+
+# logs
+logs/
+*.log
+
+# uploads
+public/uploads/photos/
