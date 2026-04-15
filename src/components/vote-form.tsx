@@ -41,9 +41,10 @@ interface VoteFormProps {
   colleagues: Colleague[];
   hasVoted: boolean;
   userId: string;
+  votingEnabled?: boolean;
 }
 
-export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
+export function VoteForm({ colleagues, hasVoted, userId, votingEnabled = true }: VoteFormProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -92,7 +93,7 @@ export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
-                disabled={isPending || hasVoted}
+                disabled={isPending || hasVoted || !votingEnabled}
               />
             </div>
         </div>
@@ -107,7 +108,7 @@ export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                   className="grid grid-cols-1 gap-4 md:grid-cols-2"
-                  disabled={isPending || hasVoted}
+                  disabled={isPending || hasVoted || !votingEnabled}
                 >
                   {filteredColleagues.map((colleague) => (
                     <FormItem key={colleague.id}>
@@ -116,8 +117,8 @@ export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
                       </FormControl>
                       <Label
                         htmlFor={field.name + colleague.id}
-                        onClick={() => !hasVoted && form.setValue('candidateId', colleague.id)}
-                        className={`flex flex-col rounded-lg border-2 border-muted bg-popover text-popover-foreground transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:shadow-lg ${hasVoted ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
+                        onClick={() => votingEnabled && !hasVoted && form.setValue('candidateId', colleague.id)}
+                        className={`flex flex-col rounded-lg border-2 border-muted bg-popover text-popover-foreground transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:shadow-lg ${hasVoted || !votingEnabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
                       >
                          <RadioGroupItem value={colleague.id} id={field.name + colleague.id} className="sr-only" />
                         <CardContent className="relative flex items-center space-x-4 p-4">
@@ -171,7 +172,7 @@ export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
                   placeholder="Explica por qué crees que esta persona merece ser elegida..."
                   className="min-h-[120px] resize-none"
                   {...field}
-                  disabled={isPending || hasVoted}
+                  disabled={isPending || hasVoted || !votingEnabled}
                 />
               </FormControl>
                <p className="text-sm text-muted-foreground">
@@ -192,9 +193,14 @@ export function VoteForm({ colleagues, hasVoted, userId }: VoteFormProps) {
                   }
                 }}
                 className="w-full text-lg py-6" 
-                disabled={isPending || hasVoted || !form.watch('candidateId') || !form.watch('reason')}
+                disabled={isPending || hasVoted || !votingEnabled || !form.watch('candidateId') || !form.watch('reason')}
             >
-              {hasVoted ? (
+              {!votingEnabled ? (
+                <>
+                  <Vote className="mr-2 h-5 w-5" />
+                  Votación Cerrada
+                </>
+              ) : hasVoted ? (
                 <>
                   <Check className="mr-2 h-5 w-5" />
                   Ya emitiste tu voto

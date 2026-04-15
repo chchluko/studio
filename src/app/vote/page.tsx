@@ -4,7 +4,7 @@ import { VoteForm } from '@/components/vote-form';
 import { VotaCompaLogo } from '@/components/votacompa-logo';
 import { LogoutButton } from '@/components/logout-button';
 import { UploadPhoto } from './upload-photo';
-import { isAdmin } from '@/lib/constants';
+import { isAdmin, VOTING_ENABLED } from '@/lib/constants';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Trophy, BarChart, Users } from 'lucide-react';
@@ -55,7 +55,7 @@ export default async function VotePage() {
           </div>
         </header>
 
-        <VoteForm colleagues={allColleagues} hasVoted={hasVoted} userId={user.id} />
+        <VoteForm colleagues={allColleagues} hasVoted={hasVoted} userId={user.id} votingEnabled={VOTING_ENABLED} />
       </div>
     </main>
   );

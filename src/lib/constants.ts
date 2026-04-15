@@ -10,6 +10,9 @@ export const COOKIE_NAME = 'votacompa-user';
 // ID del empleado administrador con acceso a funciones administrativas
 export const ADMIN_EMPLOYEE_ID = '4279';
 
+// Control de votación activa
+export const VOTING_ENABLED = false; // Cambiar a true para habilitar votación
+
 /**
  * Verifica si el usuario actual es administrador
  * @returns true si el usuario tiene permisos de administrador
